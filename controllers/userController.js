@@ -19,7 +19,6 @@ const createUser = async(req, res) => {//Se define la función para crear un usu
     try {
         const newUser = await User.create({ //Se crea un nuevo usuario en la base de datos con los datos recibidos.
             username,
-            username,
             email,
             password: hashedPassword //Guarda la contraseña encriptada.
         })
