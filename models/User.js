@@ -10,6 +10,14 @@ const User = sequelize.define('User', {// Define el modelo 'User' y sus campos.
         type: DataTypes.STRING, //Solo con string el lo crea como un varchar.
         allowNull: false
     },
+    lastname:{ //Restricciones o valores que t  endra username
+        type: DataTypes.STRING, //Solo con string el lo crea como un varchar.
+        allowNull: false
+    },
+    city:{ //Restricciones o valores que tendra username
+        type: DataTypes.STRING, //Solo con string el lo crea como un varchar.
+        allowNull: false
+    },
     email:{
         type: DataTypes.STRING, 
         allowNull: false, 
