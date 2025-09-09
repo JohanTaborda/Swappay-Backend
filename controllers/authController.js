@@ -1,7 +1,8 @@
-const bcrypt = require('bcrypt'); //Importamos la librería bcrypt para encriptar contraseñas.
-const User = require("../models/User") //Importamos el modelo User para interactuar con la base de datos.
+const bcrypt = require('bcrypt');
+const User = require("../models/User");
+const jwt = require('jsonwebtoken');
 
-// ...existing code...
+const SECRET_JWT_SWAP = 'Th&$&$$W4pP4y_$3Cr3T_k3Y@';
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -10,16 +11,20 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: 'Usuario no encontrado' });
     }
-    // Verifica que la contraseña sea exactamente igual
-    const bcrypt = require('bcrypt');
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: 'Credenciales incorrectas' });
     }
+ 
+    const token = jwt.sign(
+      { id: user.id, email: user.email, rol: user.rol },
+      SECRET_JWT_SWAP,
+      { expiresIn: '20m' }
+    );
     res.json({
-      id: user.id,
       username: user.username,
-      email: user.email,
+      rol: user.rol,
+      token,
       message: 'Autenticación exitosa'
     });
   } catch (error) {
@@ -27,8 +32,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// ...existing code...
-
 module.exports = { 
-    loginUser // Exporta la función de login
+    loginUser
 }

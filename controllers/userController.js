@@ -9,30 +9,28 @@ const User = require("../models/User") //Importamos el modelo User para interact
 
 //Métodos POST
 
-const createUser = async(req, res) => {//Se define la función para crear un usuario (POST).
-    
-    //Desestructuramos los datos.
-    const { username,lastname,city, email, password} = req.body; // Extrae los datos enviados desde el frontend en el cuerpo de la petición.
+const createUser = async(req, res) => {
+    const { username, city, email, password, rol } = req.body;
     const exist = await User.findOne({ where: { email } });
     if (exist) {
       return res.status(400).json({ message: 'El email ya está registrado' });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);//Se encripta la contraseña usando bcrypt con 10 valores.
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-        const newUser = await User.create({ //Se crea un nuevo usuario en la base de datos con los datos recibidos.
+        const newUser = await User.create({
             username,
-            lastname,
             city,
             email,
-            password: hashedPassword //Guarda la contraseña encriptada.
-        })
-        res.status(201).json({ // Si la creación es exitosa, responde con el usuario creado y un mensaje.
-            id: newUser.id,
+            password: hashedPassword,
+            rol
+        });
+
+        res.status(201).json({
             username: newUser.username,
-            lastname: newUser.lastname,
             city: newUser.city,
             email: newUser.email,
+            rol: newUser.rol,
             message: 'Usuario creado correctamente'
         });
     } catch (error) {
@@ -44,7 +42,7 @@ const createUser = async(req, res) => {//Se define la función para crear un usu
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { username, lastname, city, email, password } = req.body;
+  const { username, city, email, password, rol } = req.body;
 
   try {
     const user = await User.findByPk(id);
@@ -69,18 +67,17 @@ const updateUser = async (req, res) => {
 
     await user.update({
       username: username || user.username,
-      lastname: lastname || user.lastname,
       city: city || user.city,
       email: email || user.email,
-      password: hashedPassword
+      password: hashedPassword,
+      rol: rol || user.rol
     });
 
     res.json({
-      id: user.id,
       username: user.username,
-      lastname: user.lastname,
       city: user.city,
       email: user.email,
+      rol: user.rol,
       message: 'Usuario actualizado correctamente'
     });
 
@@ -89,8 +86,6 @@ const updateUser = async (req, res) => {
   }
 };
 // DELETE
-
-// ...existing code...
 
 const deleteUser = async (req, res) => {
   const { id } = req.params;
@@ -106,7 +101,7 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// ...existing code...
+
 
 module.exports = { 
     createUser,
