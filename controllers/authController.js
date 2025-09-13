@@ -2,7 +2,8 @@ const bcrypt = require('bcrypt');
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 
-const SECRET_JWT_SWAP = 'Th&$&$$W4pP4y_$3Cr3T_k3Y@';
+require('dotenv').config();
+const SECRET_JWT_SWAP = process.env.SECRET_JWT_SWAP;
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -31,6 +32,7 @@ const loginUser = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 module.exports = { 
     loginUser
