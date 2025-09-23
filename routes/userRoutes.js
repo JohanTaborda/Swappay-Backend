@@ -7,4 +7,7 @@ router.post('/', userController.createUser); // Define la ruta POST en '/' que l
 router.put('/:id', userController.updateUser); // Define la ruta PUT en '/:id' que llama a la función updateUser del controlador cuando se recibe una petición con un ID de usuario.
 router.delete('/:id', userController.deleteUser); // Define la ruta DELETE en '/:id' que llama a la función deleteUser del controlador cuando se recibe una petición con un ID de usuario.
 
+//Obtener paises
+router.get('/countries', userController.countries);
+
 module.exports = router; //Exportamos el router para usarlo en otros archivos, como en index.js.

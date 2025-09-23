@@ -3,14 +3,26 @@ const User = require("../models/User") //Importamos el modelo User para interact
 
 //Métodos GET. 
 
+//Metodo para obtener los paises para el menu de registro.
 
-
+const countries = async (req, res) => {
+  try {
+    const response = await fetch('https://www.apicountries.com/countries');
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener los países', error: error.message });
+  }
+};
 
 
 //Métodos POST
 
 const createUser = async(req, res) => {
-    const { username, city, email, password, rol } = req.body;
+    const { username, country, email, password, rol } = req.body;
     const exist = await User.findOne({ where: { email } });
     if (exist) {
       return res.status(400).json({ message: 'El email ya está registrado' });
@@ -20,7 +32,7 @@ const createUser = async(req, res) => {
     try {
         const newUser = await User.create({
             username,
-            city,
+            country,
             email,
             password: hashedPassword,
             rol
@@ -28,7 +40,7 @@ const createUser = async(req, res) => {
 
         res.status(201).json({
             username: newUser.username,
-            city: newUser.city,
+            country: newUser.country,
             email: newUser.email,
             rol: newUser.rol,
             message: 'Usuario creado correctamente'
@@ -42,7 +54,7 @@ const createUser = async(req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { username, city, email, password, rol } = req.body;
+  const { username, country, email, password, rol } = req.body;
 
   try {
     const user = await User.findByPk(id);
@@ -67,7 +79,7 @@ const updateUser = async (req, res) => {
 
     await user.update({
       username: username || user.username,
-      city: city || user.city,
+      country: country || user.country,
       email: email || user.email,
       password: hashedPassword,
       rol: rol || user.rol
@@ -75,7 +87,7 @@ const updateUser = async (req, res) => {
 
     res.json({
       username: user.username,
-      city: user.city,
+      country: user.country,
       email: user.email,
       rol: user.rol,
       message: 'Usuario actualizado correctamente'
@@ -102,9 +114,9 @@ const deleteUser = async (req, res) => {
 };
 
 
-
 module.exports = { 
     createUser,
+    countries,
     updateUser,
     deleteUser // Agrega la exportación
 }

@@ -6,8 +6,12 @@ const app = express();
 const port = 3000;
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  origin: true, 
+  credentials: true
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 require('dotenv').config();
