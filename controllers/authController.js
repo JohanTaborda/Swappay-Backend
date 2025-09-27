@@ -20,14 +20,19 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email, rol: user.rol },
       SECRET_JWT_SWAP,
-      { expiresIn: '20m' }
+      { expiresIn: '5m' }
     );
-    res.json({
-      username: user.username,
-      rol: user.rol,
-      token,
-      message: 'Autenticación exitosa'
-    });
+    res
+      .cookie('access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 1000*60*5
+      })
+      .json({
+        username: user.username,
+        message: 'Autenticación exitosa'
+      });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

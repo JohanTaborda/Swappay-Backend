@@ -26,11 +26,13 @@ sequelize.sync()
 
 // Conectamos las rutas.
 const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes'); // <-- Agregado
+const authRoutes = require('./routes/authRoutes');
+const verificationRoutes = require('./routes/verificationRoutes');
 
 // Usamos las rutas..
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes); 
+app.use('/verification', verificationRoutes);
 
 app.get('/', (req, res) => {
     res.send("Hola desde la API de Swappay.")
