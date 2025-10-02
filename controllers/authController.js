@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const SECRET_JWT_SWAP = process.env.SECRET_JWT_SWAP;
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res) => { //Inicio de sesión del usuario.
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ where: { email } });
@@ -38,7 +38,14 @@ const loginUser = async (req, res) => {
   }
 };
 
+const logoutUser = async (req,res) => { //Cierre de sesión del usuario.
+    res
+      .clearCookie("access_token")
+      .json({message: "Logout Exitoso."})
+}
+
 
 module.exports = { 
-    loginUser
+    loginUser,
+    logoutUser
 }
