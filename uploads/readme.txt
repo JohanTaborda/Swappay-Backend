@@ -1,0 +1,1 @@
+Carpeta dónde se almacenan todas las imagenes de la aplicación.
