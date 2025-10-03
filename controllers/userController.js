@@ -66,6 +66,14 @@ const updateUser = async (req, res) => { //Actualizar la información del usuari
       }
     }
 
+    // Verificar si el teléfono cambia y que no exista en otro usuario
+    if (phone && phone !== user.phone) { 
+      const exist = await User.findOne({ where: { phone } }); //Buscamos si el nuevo teléfono ya está registrado en otro usuario
+      if (exist) {
+        return res.status(400).json({ message: 'El teléfono ya está registrado en otro usuario' });
+      }
+    }
+
     // Actualizar solo los campos que vengan en el body
     const updatedData = {}; //Objeto para almacenar los datos a actualizar
     if (username !== undefined) updatedData.username = username;
