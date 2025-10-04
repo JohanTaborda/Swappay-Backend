@@ -29,12 +29,14 @@ sequelize.sync() //Sincronizamos los modelos con la base de datos.
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
+const productRoutes = require('./routes/productsRoutes')
 
 // Usamos las rutas..
-app.use('/users', userRoutes);
-app.use('/auth', authRoutes); 
-app.use('/verification', verificationRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/users', userRoutes); // Rutas para gestión de usuarios
+app.use('/auth', authRoutes); // Rutas para autenticación
+app.use('/verification', verificationRoutes); // Rutas para verificación de token
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Servimos archivos estáticos desde la carpeta 'uploads'
+app.use('/products', productRoutes) // Rutas para productos
 
 app.get('/', (req, res) => { //Ruta raíz para verificar que el servidor está funcionando.
     res.send("Hola desde la API de Swappay.")

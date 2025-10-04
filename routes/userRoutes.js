@@ -1,7 +1,7 @@
 const express = require('express') //Importamos el framework Express para crear rutas HTTP.
 const router = express.Router(); //Se crea una instancia de router de Express para definir rutas específicas de usuario.
 const userController = require("../controllers/userController") //Importamos el controlador de usuario, donde están las funciones para manejar las peticiones.
-const upload = require('../middlewares/uploadMiddlewares') //Importamos el middleware para manejar la subida de archivos.
+const {uploadProfile} = require('../middlewares/uploadMiddlewares') //Importamos el middleware para subir imágenes de perfil
 
 // Crear un nuevo usuario.
 router.post('/', userController.createUser); // Define la ruta POST en '/' que llama a la función createUser del controlador cuando se recibe una petición.
@@ -16,7 +16,7 @@ router.get('/countries', userController.countries);
 
 //Actualizar imagen de perfil.
 // Define la ruta PUT en '/:id/profile-image' que utiliza el middleware de subida de archivos y llama a la función uploadProfileImage del controlador cuando se recibe una petición con un ID de usuario.
-router.put('/:id/profile-image', upload.single('profileImage'), userController.uploadProfileImage); 
+router.put('/:id/profile-image', uploadProfile.single('profileImage'), userController.uploadProfileImage); 
 
 // Eliminar imagen de perfil
 router.delete('/:id/profile-image', userController.deleteProfileImage);
