@@ -6,22 +6,22 @@ const path = require('path'); //Importamos path para manejar rutas de archivos.
 
 const createProducts = async(req, res) =>  { //Creamos un producto nuevo.
     // Obtenemos los datos del producto desde el cuerpo de la solicitud
-    const { idUser, title, description, category, condition, amount, typeExchange, priceSwapcoins, additionalNotes, ubication, deliveryMethod } = req.body;
+    const { idUser, title, description, category, condition, amount, interests, priceSwapcoins, additionalNotes, ubication, deliveryMethod } = req.body;
 
     // Obtén las rutas de las imágenes subidas
     const image1 = req.files?.image1 ? `/uploads/products/${req.files.image1[0].filename}` : null;
     const image2 = req.files?.image2 ? `/uploads/products/${req.files.image2[0].filename}` : null;
     const image3 = req.files?.image3 ? `/uploads/products/${req.files.image3[0].filename}` : null;
 
-    if (!title || title.length < 5)  return res.status(400).json({ error: "El título debe tener al menos 5 caracteres." }); // Validación del título
-    if (!description || description.length < 10)  return res.status(400).json({ error: "La descripción debe tener al menos 10 caracteres." }); // Validación de la descripción
+    if (!title || title.length < 15)  return res.status(400).json({ error: "El título debe tener al menos 15 caracteres." }); // Validación del título
+    if (!description || description.length < 30)  return res.status(400).json({ error: "La descripción debe tener al menos 30 caracteres." }); // Validación de la descripción
 
     try {
         await Products.create({ // Creamos un nuevo producto en la base de datos con los datos proporcionados.
             idUser, title,
             description, category, 
             condition, amount,
-            typeExchange, priceSwapcoins,
+            interests, priceSwapcoins,
             additionalNotes, ubication,
             deliveryMethod, image1,
             image2, image3

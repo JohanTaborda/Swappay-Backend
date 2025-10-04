@@ -19,18 +19,18 @@ const Products = sequelize.define('Products', { //Definimos el modelo Products c
         allowNull: false
     },
     category: { //Categoría del producto
-        type: DataTypes.ENUM('Tecnología', 'Hogar', 'Ropa', 'Deportes', 'Entretenimiento', 'Libros'),
+        type: DataTypes.ENUM('Tecnología', 'Hogar', 'Ropa', 'Deportes', 'Entretenimiento', 'Libros', 'Juguetes'),
         allowNull: false
     },
     condition: { //Condición del producto (nuevo o usado)
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Nuevo','Reacondicionado','Usado'),
         allowNull: false
     },
     amount: { //Cantidad disponible del producto
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    typeExchange: { //Tipo de intercambio (trueque o venta)
+    interests: { //Tipo de intercambio (trueque o venta)
         type: DataTypes.STRING,
         allowNull:false
     },
