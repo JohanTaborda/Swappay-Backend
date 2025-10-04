@@ -1,11 +1,9 @@
-//Configuración de la base de datos.
-
 const {Sequelize} = require('sequelize'); //Creamos el objeto sequelize 
 
 const sequelize = new Sequelize( //Se crea una instancia de Sequelize con los datos de conexión a la base de datos.
     'BackendSwappay', //Nombre de la DB a la que se conecta
     'root', //Usuario
-    'palacio.*0127', //Contraseña
+    '11120201104021', //Contraseña
     {
         host: 'localhost', //Dirección del servidor donde está la base de datos 
         dialect: 'mysql' //Dialecto con el que habla la DB.
