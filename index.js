@@ -1,47 +1,101 @@
-const express = require('express'); //Importamos el framework Express para crear la aplicación web.
-const sequelize = require('./database'); //Importamos la configuración de la base de datos.
-const morgan = require('morgan'); //Importamos Morgan para registrar las solicitudes HTTP en la consola.
-const jwt = require('jsonwebtoken'); //Importamos la librería jsonwebtoken para manejar tokens JWT.
-const app = express(); //Creamos una instancia de la aplicación Express.
-const port = 3000; //Definimos el puerto en el que se ejecutará el servidor.
-const path = require('path'); //Módulo path para manejar rutas de archivos y directorios.
-const cors = require('cors'); //Importamos CORS para manejar solicitudes entre diferentes dominios.
-const cookieParser = require('cookie-parser'); //Importamos cookie-parser para manejar cookies en las solicitudes HTTP.
 
-app.use(cookieParser()); //Usamos el middleware cookie-parser para parsear las cookies en las solicitudes.
-app.use(cors({ //Configuramos CORS para permitir solicitudes desde el frontend.
-  origin: true, 
-  credentials: true
-}));
-app.use(morgan('dev')); //Usamos Morgan en modo 'dev' para registrar las solicitudes HTTP en la consola.
-app.use(express.json()); //Usamos el middleware integrado de Express para parsear JSON en las solicitudes.
-require('dotenv').config(); //Cargamos las variables de entorno desde el archivo .env
+// ======================= IMPORTS =======================
+const express = require('express');
+const sequelize = require('./database');
+const morgan = require('morgan');
+const jwt = require('jsonwebtoken');
+const path = require('path');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const cron = require('node-cron');
+const { Op } = require('sequelize');
 
-sequelize.sync() //Sincronizamos los modelos con la base de datos.
-    .then(() => { // Si la sincronización es exitosa, imprimimos un mensaje en la consola.
-        console.log("Modelos Sincronizados.")
+// ======================= MODELOS =======================
+require('./models/Comment');
+require('./models/Cart');
+require('./models/CartItem');
+require('./models/ChatRoom');
+require('./models/Message');
+
+// ======================= INICIALIZACIÓN APP =======================
+const app = express();
+const port = 3000;
+
+require('dotenv').config();
+app.use(cookieParser());
+app.use(cors({ origin: true, credentials: true }));
+app.use(morgan('dev'));
+app.use(express.json());
+
+// ======================= SINCRONIZAR BASE DE DATOS =======================
+sequelize.sync()
+    .then(() => {
+        console.log("Modelos Sincronizados.");
     })
-    .catch(err => { // Si hay un error durante la sincronización, lo imprimimos en la consola.
-        console.error("Error al sincronizar los modelos.", err)
-    })
+    .catch(err => {
+        console.error("Error al sincronizar los modelos.", err);
+    });
 
-// Conectamos las rutas.
+// ======================= RUTAS =======================
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
-const productRoutes = require('./routes/productsRoutes')
+const productRoutes = require('./routes/productsRoutes');
+const commentsRoutes = require('./routes/commentsRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 
-// Usamos las rutas..
-app.use('/users', userRoutes); // Rutas para gestión de usuarios
-app.use('/auth', authRoutes); // Rutas para autenticación
-app.use('/verification', verificationRoutes); // Rutas para verificación de token
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Servimos archivos estáticos desde la carpeta 'uploads'
-app.use('/products', productRoutes) // Rutas para productos
+app.use('/users', userRoutes);
+app.use('/auth', authRoutes);
+app.use('/verification', verificationRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/products', productRoutes);
+app.use('/comentarios', commentsRoutes);
+app.use('/carrito', cartRoutes);
 
-app.get('/', (req, res) => { //Ruta raíz para verificar que el servidor está funcionando.
-    res.send("Hola desde la API de Swappay.")
-})
+app.get('/', (req, res) => {
+    res.send("Hola desde la API de Swappay.");
+});
 
-app.listen(port, () => { //Iniciamos el servidor en el puerto definido.
-    console.log(`Servidor Funcionando en el puerto: ${port}`);
-})
+// ======================= SOCKET.IO CHAT =======================
+const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer, { cors: { origin: true, credentials: true } });
+
+io.on('connection', (socket) => {
+    console.log('Usuario conectado:', socket.id);
+
+    // Unirse a una sala de chat privada
+    socket.on('joinRoom', ({ chatRoomId }) => {
+        socket.join(`chat_${chatRoomId}`);
+        console.log(`Socket ${socket.id} se unió a sala chat_${chatRoomId}`);
+    });
+
+    // Enviar mensaje a la sala
+    socket.on('sendMessage', async ({ chatRoomId, senderId, content }) => {
+        const Message = require('./models/Message');
+        await Message.create({ chatRoomId, senderId, content });
+        io.to(`chat_${chatRoomId}`).emit('newMessage', { chatRoomId, senderId, content });
+    });
+});
+
+// ======================= TAREA PROGRAMADA: BORRAR MENSAJES VIEJOS =======================
+const Message = require('./models/Message');
+cron.schedule('0 * * * *', async () => {
+    try {
+        const limite = new Date(Date.now() - 1 * 60 * 60 * 1000); // 1 hora
+        const eliminados = await Message.destroy({
+            where: {
+                createdAt: { [Op.lt]: limite }
+            }
+        });
+        if (eliminados > 0) {
+            console.log(`Mensajes eliminados automáticamente: ${eliminados}`);
+        }
+    } catch (err) {
+        console.error('Error eliminando mensajes automáticamente:', err);
+    }
+});
+
+// ======================= INICIAR SERVIDOR =======================
+httpServer.listen(port, () => {
+    console.log(`Servidor y Socket.IO funcionando en puerto ${port}`);
+});
