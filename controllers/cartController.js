@@ -1,12 +1,5 @@
-const Cart = require('../models/Cart');
 const CartItem = require('../models/CartItem');
 const Products = require('../models/Products');
-
-const getOrCreateCart = async (idUser) => {
-  let cart = await Cart.findOne({ where: { idUser } });
-  if (!cart) cart = await Cart.create({ idUser });
-  return cart;
-};
 
 const addItem = async (req, res) => {
   try {
@@ -16,15 +9,13 @@ const addItem = async (req, res) => {
     const product = await Products.findByPk(idProduct);
     if (!product) return res.status(404).json({ error: 'Producto no encontrado.' });
 
-    const cart = await getOrCreateCart(idUser);
-
-    // Ver si el item ya existe
-    let item = await CartItem.findOne({ where: { idCart: cart.id, idProduct } });
+    // Ver si el item ya existe en el carrito del usuario
+    let item = await CartItem.findOne({ where: { idUser, idProduct } });
     if (item) {
       item.quantity += Number(quantity);
       await item.save();
     } else {
-      item = await CartItem.create({ idCart: cart.id, idProduct, quantity });
+      item = await CartItem.create({ idUser, idProduct, quantity });
     }
 
     res.status(201).json({ message: 'Item añadido al carrito.', item });
@@ -38,9 +29,8 @@ const getCart = async (req, res) => {
     const { idUser } = req.query;
     if (!idUser) return res.status(400).json({ error: 'idUser requerido en query.' });
 
-    const cart = await getOrCreateCart(idUser);
-    const items = await CartItem.findAll({ where: { idCart: cart.id } });
-    res.status(200).json({ cart, items });
+    const items = await CartItem.findAll({ where: { idUser } });
+    res.status(200).json({ items });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

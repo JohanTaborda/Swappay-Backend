@@ -11,8 +11,6 @@ const cron = require('node-cron');
 const { Op } = require('sequelize');
 
 // ======================= MODELOS =======================
-require('./models/Comment');
-require('./models/Cart');
 require('./models/CartItem');
 require('./models/ChatRoom');
 require('./models/Message');
@@ -40,17 +38,19 @@ sequelize.sync()
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
+
 const productRoutes = require('./routes/productsRoutes');
-const commentsRoutes = require('./routes/commentsRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const productOfferRoutes = require('./routes/productOfferRoutes');
+
 
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/verification', verificationRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/products', productRoutes);
-app.use('/comentarios', commentsRoutes);
 app.use('/carrito', cartRoutes);
+app.use('/product-offer', productOfferRoutes);
 
 app.get('/', (req, res) => {
     res.send("Hola desde la API de Swappay.");
@@ -59,6 +59,7 @@ app.get('/', (req, res) => {
 // ======================= SOCKET.IO CHAT =======================
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer, { cors: { origin: true, credentials: true } });
+
 
 io.on('connection', (socket) => {
     console.log('Usuario conectado:', socket.id);
@@ -69,9 +70,16 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} se unió a sala chat_${chatRoomId}`);
     });
 
-    // Enviar mensaje a la sala
-    socket.on('sendMessage', async ({ chatRoomId, senderId, content }) => {
+    // Crea la sala en chat room
+    socket.on('sendMessage', async ({ chatRoomId, senderId, content, user1Id, user2Id }) => {
+        const ChatRoom = require('./models/ChatRoom');
         const Message = require('./models/Message');
+        // Si la sala no existe, créala (requiere user1Id y user2Id)
+        let chatRoom = await ChatRoom.findByPk(chatRoomId);
+        if (!chatRoom && user1Id && user2Id) {
+            chatRoom = await ChatRoom.create({ id: chatRoomId, user1Id, user2Id });
+        }
+        // Guardar el mensaje
         await Message.create({ chatRoomId, senderId, content });
         io.to(`chat_${chatRoomId}`).emit('newMessage', { chatRoomId, senderId, content });
     });
