@@ -21,16 +21,16 @@ const createProductOffer = async (req, res) => {
     const priceDiscount = priceOriginal - (priceOriginal * (discount / 100));
     // Calcular priceSwapcoins según priceOriginal
     let priceSwapcoins = 0;
-    if (priceOriginal > 5000) {
+    if (priceDiscount > 5000) {
       priceSwapcoins = 800;
     } 
-      else if (priceOriginal > 1000) {
+      else if (priceDiscount  > 1000) {
       priceSwapcoins = 1200;
-    } else if (priceOriginal > 500 && priceOriginal < 1000) {
+    } else if (priceDiscount > 500 && priceDiscount < 1000) {
       priceSwapcoins = 900;
-    } else if (priceOriginal > 300 && priceOriginal < 500) {
+    } else if (priceDiscount > 300 && priceDiscount < 500) {
       priceSwapcoins = 600;
-    } else if (priceOriginal > 0 && priceOriginal < 300) {
+    } else if (priceDiscount > 0 && priceDiscount < 300) {
       priceSwapcoins = 300;
     }
 
