@@ -20,4 +20,5 @@ router.get('/user/:id', productOfferController.getProductOffersByUser);
 // Eliminar una oferta
 router.delete('/:id', productOfferController.deleteProductOffer);
 
+
 module.exports = router;

@@ -5,11 +5,8 @@ const path = require('path');
 const createProductOffer = async (req, res) => {
   const {
     idUser, title, description, specs, category, amount,
-    priceOriginal, discount, priceSwapcoins, availability
+    priceOriginal, discount, availability
   } = req.body;
-
-
-  // Obtén las rutas de las imágenes subidas en uploads/productOffer
   const img1 = req.files?.img1 ? `/uploads/productOffer/${req.files.img1[0].filename}` : null;
   const img2 = req.files?.img2 ? `/uploads/productOffer/${req.files.img2[0].filename}` : null;
   const img3 = req.files?.img3 ? `/uploads/productOffer/${req.files.img3[0].filename}` : null;
@@ -17,13 +14,32 @@ const createProductOffer = async (req, res) => {
   if (!img1) return res.status(400).json({ error: "La imagen principal (img1) es obligatoria." });
   if (!title || title.length < 5) return res.status(400).json({ error: "El título debe tener al menos 5 caracteres." });
   if (!description || description.length < 10) return res.status(400).json({ error: "La descripción debe tener al menos 10 caracteres." });
+  if (isNaN(amount) || Number(amount) < 0) return res.status(400).json({ error: "La cantidad debe ser un número igual o mayor a 0." });
 
   try {
     // Calcular el precio con descuento
     const priceDiscount = priceOriginal - (priceOriginal * (discount / 100));
+    // Calcular priceSwapcoins según priceOriginal
+    let priceSwapcoins = 0;
+    if (priceOriginal > 5000) {
+      priceSwapcoins = 800;
+    } 
+      else if (priceOriginal > 1000) {
+      priceSwapcoins = 1200;
+    } else if (priceOriginal > 500 && priceOriginal < 1000) {
+      priceSwapcoins = 900;
+    } else if (priceOriginal > 300 && priceOriginal < 500) {
+      priceSwapcoins = 600;
+    } else if (priceOriginal > 0 && priceOriginal < 300) {
+      priceSwapcoins = 300;
+    }
+
+    const availabilityBool = Number(amount) > 0;
     await ProductOffer.create({
-      idUser, title, description, specs, category, amount,
-      priceOriginal, discount, priceDiscount, priceSwapcoins, availability,
+      idUser, title, description, specs, category,
+      amount: Number(amount),
+      priceOriginal, discount, priceDiscount, priceSwapcoins,
+      availability: availabilityBool,
       img1, img2, img3
     });
     res.status(201).json({ message: "Oferta de producto creada exitosamente." });
