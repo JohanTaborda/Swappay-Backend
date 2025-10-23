@@ -27,12 +27,11 @@ const createProductOffer = async (req, res) => {
       img1, img2, img3
     });
     res.status(201).json({ message: "Oferta de producto creada exitosamente." });
+
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
-
-
 
 
 const getAllProductOffers = async (req, res) => {
@@ -60,8 +59,6 @@ const getAllProductOffers = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
-
 
 const getProductOffersByUser = async (req, res) => {
   const { id } = req.params;
@@ -97,19 +94,19 @@ const deleteProductOffer = async (req, res) => {
     const offer = await ProductOffer.findByPk(id);
     if (!offer) return res.status(404).json({ message: "Oferta no encontrada." });
     // Elimina las imágenes si existen
-    [offer.img1, offer.img2, offer.img3].forEach(img => {
-      if (img) {
-        const fileName = path.basename(img);
-        const imgPath = path.join(__dirname, '..', 'uploads', 'products', fileName);
-        try {
-          if (fs.existsSync(imgPath)) {
-            fs.unlinkSync(imgPath);
+      [offer.img1, offer.img2, offer.img3].forEach(img => {
+        if (img) {
+          const fileName = path.basename(img);
+          const imgPath = path.join(__dirname, '..', 'uploads', 'productOffer', fileName);
+          try {
+            if (fs.existsSync(imgPath)) {
+              fs.unlinkSync(imgPath);
+            }
+          } catch (err) {
+            console.log(err);
           }
-        } catch (err) {
-          console.log(err);
         }
-      }
-    });
+      });
     await offer.destroy();
     res.status(200).json({ message: "Oferta eliminada correctamente." });
   } catch (error) {
